@@ -1,0 +1,115 @@
+package cy.jdkdigital.camol.event;
+
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import cy.jdkdigital.camol.Camol;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.AddSectionGeometryEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.pipeline.VertexConsumerWrapper;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@EventBusSubscriber(modid = Camol.MODID, value = Dist.CLIENT)
+public class ClientEventHandler
+{
+    public static boolean shouldBeTransparent = false;
+    public static boolean isTransparent = false;
+    @SubscribeEvent
+    public static void onRenderLevelStage(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+            return;
+        }
+
+        if (shouldBeTransparent != isTransparent) {
+            isTransparent = shouldBeTransparent;
+            Set<SectionPos> sections = new HashSet<>();
+
+//            var chunkStorage = Minecraft.getInstance().level.getChunkSource().storage;
+//            for (int i = 0; i <= chunkStorage.chunks.length(); i++) {
+//                chunkStorage.getChunk(i).getData(Camol.CAMO_BLOCK_MAP).keySet().forEach(posKey -> {
+//                    sections.add(SectionPos.of(Long.parseLong(posKey)));
+//                });
+//            }
+
+            Camol.LOGGER.info("sections " + sections.size() + " / " + Minecraft.getInstance().level.getData(Camol.CAMO_BLOCK_MAP).size());
+
+            for (SectionPos section : sections) {
+                Minecraft.getInstance().levelRenderer.setSectionDirty(section.x(), section.y(), section.z());
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void geometryEvent(AddSectionGeometryEvent event) {
+        SectionPos section = SectionPos.of(event.getSectionOrigin());
+
+        Map<BlockPos, BlockState> camoBlocks = event.getLevel().getChunkAt(event.getSectionOrigin()).getData(Camol.CAMO_BLOCK_MAP).entrySet().stream()
+                .filter(p -> SectionPos.of(BlockPos.of(Long.parseLong(p.getKey()))).equals(section))
+                .collect(Collectors.toMap(e -> BlockPos.of(Long.parseLong(e.getKey())), Map.Entry::getValue));
+
+        if (camoBlocks.isEmpty()) {
+            return;
+        }
+
+        event.addRenderer(sectionRenderingContext -> {
+            BlockAndTintGetter level = sectionRenderingContext.getRegion();
+            var random = RandomSource.create();
+
+            for (Map.Entry<BlockPos, BlockState> entry : camoBlocks.entrySet()) {
+                BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+                BlockState camoState = entry.getValue();
+                BlockPos pos = entry.getKey();
+                PoseStack poseStack = sectionRenderingContext.getPoseStack();
+
+                BakedModel model = blockRenderer.getBlockModel(camoState);
+                ModelData modelData = model.getModelData(level, pos, camoState, ModelData.EMPTY);
+
+                poseStack.pushPose();
+                poseStack.translate(SectionPos.sectionRelative(pos.getX()), SectionPos.sectionRelative(pos.getY()), SectionPos.sectionRelative(pos.getZ()));
+
+                poseStack.translate(0.5, 0.5, 0.5);
+                poseStack.scale(1.005F, 1.005F, 1.005F);
+                poseStack.translate(-0.5, -0.5, -0.5);
+
+                boolean shouldRenderTransparentCamo = false; // TODO Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).is(Camol.CAMO_ITEM);
+                for (RenderType renderType : model.getRenderTypes(camoState, random, ModelData.EMPTY)) {
+                    VertexConsumer buffer = sectionRenderingContext.getOrCreateChunkBuffer(shouldRenderTransparentCamo ? RenderType.translucent() : renderType);
+                    if (shouldRenderTransparentCamo) {
+                        buffer = new SemiTransparentVertexConsumer(buffer);
+                    }
+                    blockRenderer.renderBatched(camoState, pos, level, poseStack, buffer, true, random, modelData, renderType);
+                }
+                poseStack.popPose();
+            }
+        });
+    }
+
+    private static class SemiTransparentVertexConsumer extends VertexConsumerWrapper
+    {
+        public SemiTransparentVertexConsumer(VertexConsumer consumer) {
+            super(consumer);
+        }
+
+        @Override
+        public @NotNull VertexConsumer setColor(int color) {
+            super.setColor(color & 0x80ffffff);
+            return this;
+        }
+    }
+}
