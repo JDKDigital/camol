@@ -2,10 +2,13 @@ package cy.jdkdigital.camol.common.item;
 
 import cy.jdkdigital.camol.Camol;
 import cy.jdkdigital.camol.network.SyncChunkCamoData;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
@@ -15,6 +18,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class CamoItem extends Item
 {
@@ -47,6 +51,19 @@ public class CamoItem extends Item
             PacketDistributor.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(context.getClickedPos()), new SyncChunkCamoData(camoData, context.getClickedPos()));
         }
         return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
+    }
+
+    @Override
+    public Component getName(ItemStack stack) {
+        if (stack.has(Camol.BLOCK_COMPONENT)) {
+            return Component.translatable(this.getDescriptionId(stack) + ".camo", Component.translatable(stack.get(Camol.BLOCK_COMPONENT).getBlock().getDescriptionId()));
+        }
+        return super.getName(stack);
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(Component.translatable(this.getDescriptionId() + ".hover" + (!stack.has(Camol.BLOCK_COMPONENT) ? "_empty" : "")).withStyle(ChatFormatting.GREEN));
     }
 
     public static ItemStack getCamoItem(BlockState state) {

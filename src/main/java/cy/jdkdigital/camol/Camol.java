@@ -84,10 +84,7 @@ public class Camol
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
-        // Camo item, can be crafted together with any block to tune it to that block
-        // when a tuned camo block is right-click on a block in world, that block position will look like the tuned block
         // somehow handle blockstates, maybe by putting it in different slots in the crafting grid or have a machine for it
-        // handle translucent blocks so the original block is still rendered and then the camo block on top
 
         // crafting recipe for camo item
         // model for empty camo item
@@ -109,7 +106,7 @@ public class Camol
 
     private static DeferredBlock<Block> registerBlock(String name, Supplier<? extends Block> sup) {
         DeferredBlock<Block> block = BLOCKS.register(name, sup);
-        ITEMS.registerSimpleBlockItem(name, block);
+//        ITEMS.registerSimpleBlockItem(name, block);
         return block;
     }
 

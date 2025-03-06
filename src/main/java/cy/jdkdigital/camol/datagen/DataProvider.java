@@ -29,9 +29,7 @@ public class DataProvider
             CompletableFuture<HolderLookup.Provider> provider = event.getLookupProvider();
             ExistingFileHelper helper = event.getExistingFileHelper();
 
-//            gen.addProvider(event.includeClient(), new LanguageProvider(output, "en_us"));
-
-//            gen.addProvider(event.includeServer(), new RecipeProvider(output, provider));
+            gen.addProvider(event.includeServer(), new RecipeProvider(output, provider));
 
             BlockTagProvider blockTags = new BlockTagProvider(output, provider, helper);
             gen.addProvider(event.includeServer(), blockTags);

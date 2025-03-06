@@ -1,6 +1,5 @@
 package cy.jdkdigital.camol.event;
 
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import cy.jdkdigital.camol.Camol;
@@ -11,8 +10,10 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -36,18 +37,23 @@ public class ClientEventHandler
             return;
         }
 
-        if (shouldBeTransparent != isTransparent) {
+        if (Minecraft.getInstance().level != null && shouldBeTransparent != isTransparent) {
             isTransparent = shouldBeTransparent;
             Set<SectionPos> sections = new HashSet<>();
 
-//            var chunkStorage = Minecraft.getInstance().level.getChunkSource().storage;
-//            for (int i = 0; i <= chunkStorage.chunks.length(); i++) {
-//                chunkStorage.getChunk(i).getData(Camol.CAMO_BLOCK_MAP).keySet().forEach(posKey -> {
-//                    sections.add(SectionPos.of(Long.parseLong(posKey)));
-//                });
-//            }
+            var chunkStorage = Minecraft.getInstance().level.getChunkSource().storage;
 
-            Camol.LOGGER.info("sections " + sections.size() + " / " + Minecraft.getInstance().level.getData(Camol.CAMO_BLOCK_MAP).size());
+            int i = chunkStorage.chunkRadius;
+            for (int j = chunkStorage.viewCenterZ - i; j <= chunkStorage.viewCenterZ + i; j++) {
+                for (int k = chunkStorage.viewCenterX - i; k <= chunkStorage.viewCenterX + i; k++) {
+                    LevelChunk levelchunk = chunkStorage.chunks.get(chunkStorage.getIndex(k, j));
+                    if (levelchunk != null) {
+                        levelchunk.getData(Camol.CAMO_BLOCK_MAP).keySet().forEach(posKey -> {
+                            sections.add(SectionPos.of(BlockPos.of((Long.parseLong(posKey)))));
+                        });
+                    }
+                }
+            }
 
             for (SectionPos section : sections) {
                 Minecraft.getInstance().levelRenderer.setSectionDirty(section.x(), section.y(), section.z());
@@ -63,41 +69,36 @@ public class ClientEventHandler
                 .filter(p -> SectionPos.of(BlockPos.of(Long.parseLong(p.getKey()))).equals(section))
                 .collect(Collectors.toMap(e -> BlockPos.of(Long.parseLong(e.getKey())), Map.Entry::getValue));
 
-        if (camoBlocks.isEmpty()) {
-            return;
-        }
+        if (!camoBlocks.isEmpty() && Minecraft.getInstance().player != null) {
+            event.addRenderer(sectionRenderingContext -> {
+                BlockAndTintGetter level = sectionRenderingContext.getRegion();
+                var random = RandomSource.create();
 
-        event.addRenderer(sectionRenderingContext -> {
-            BlockAndTintGetter level = sectionRenderingContext.getRegion();
-            var random = RandomSource.create();
+                for (Map.Entry<BlockPos, BlockState> entry : camoBlocks.entrySet()) {
+                    BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+                    BlockState camoState = entry.getValue();
+                    BlockPos pos = entry.getKey();
+                    PoseStack poseStack = sectionRenderingContext.getPoseStack();
 
-            for (Map.Entry<BlockPos, BlockState> entry : camoBlocks.entrySet()) {
-                BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-                BlockState camoState = entry.getValue();
-                BlockPos pos = entry.getKey();
-                PoseStack poseStack = sectionRenderingContext.getPoseStack();
+                    BakedModel model = blockRenderer.getBlockModel(camoState);
+                    ModelData modelData = model.getModelData(level, pos, camoState, ModelData.EMPTY);
 
-                BakedModel model = blockRenderer.getBlockModel(camoState);
-                ModelData modelData = model.getModelData(level, pos, camoState, ModelData.EMPTY);
+                    poseStack.pushPose();
+                    poseStack.translate(SectionPos.sectionRelative(pos.getX()), SectionPos.sectionRelative(pos.getY()), SectionPos.sectionRelative(pos.getZ()));
 
-                poseStack.pushPose();
-                poseStack.translate(SectionPos.sectionRelative(pos.getX()), SectionPos.sectionRelative(pos.getY()), SectionPos.sectionRelative(pos.getZ()));
+                    poseStack.translate(0.5, 0.5, 0.5);
+                    poseStack.scale(1.005F, 1.005F, 1.005F);
+                    poseStack.translate(-0.5, -0.5, -0.5);
 
-                poseStack.translate(0.5, 0.5, 0.5);
-                poseStack.scale(1.005F, 1.005F, 1.005F);
-                poseStack.translate(-0.5, -0.5, -0.5);
-
-                boolean shouldRenderTransparentCamo = false; // TODO Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).is(Camol.CAMO_ITEM);
-                for (RenderType renderType : model.getRenderTypes(camoState, random, ModelData.EMPTY)) {
-                    VertexConsumer buffer = sectionRenderingContext.getOrCreateChunkBuffer(shouldRenderTransparentCamo ? RenderType.translucent() : renderType);
-                    if (shouldRenderTransparentCamo) {
-                        buffer = new SemiTransparentVertexConsumer(buffer);
+                    boolean shouldRenderTransparentCamo = Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).is(Camol.CAMO_ITEM);
+                    for (RenderType renderType : model.getRenderTypes(camoState, random, ModelData.EMPTY)) {
+                        VertexConsumer buffer = sectionRenderingContext.getOrCreateChunkBuffer(shouldRenderTransparentCamo ? RenderType.translucent() : renderType);
+                        blockRenderer.renderBatched(camoState, pos, level, poseStack, shouldRenderTransparentCamo ? new SemiTransparentVertexConsumer(buffer) : buffer, true, random, modelData, renderType);
                     }
-                    blockRenderer.renderBatched(camoState, pos, level, poseStack, buffer, true, random, modelData, renderType);
+                    poseStack.popPose();
                 }
-                poseStack.popPose();
-            }
-        });
+            });
+        }
     }
 
     private static class SemiTransparentVertexConsumer extends VertexConsumerWrapper

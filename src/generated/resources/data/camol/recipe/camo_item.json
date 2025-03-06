@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "tag": "c:dyes/blue"
+    },
+    "G": {
+      "tag": "c:dyes/green"
+    },
+    "K": {
+      "tag": "c:dyes/white"
+    },
+    "R": {
+      "tag": "c:dyes/red"
+    },
+    "W": {
+      "tag": "c:dyes/black"
+    }
+  },
+  "pattern": [
+    "R G",
+    " B ",
+    "W K"
+  ],
+  "result": {
+    "count": 4,
+    "id": "camol:camo_item"
+  }
+}
