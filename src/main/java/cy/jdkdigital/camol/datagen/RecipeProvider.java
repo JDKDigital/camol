@@ -35,6 +35,6 @@ public class RecipeProvider extends net.minecraft.data.recipes.RecipeProvider im
     }
 
     private static ResourceLocation prefixedRecipeId(ItemLike item, String prefix) {
-        return BuiltInRegistries.ITEM.getKey(item.asItem()).withPath(path ->  prefix + path);
+        return BuiltInRegistries.ITEM.getKey(item.asItem()).withPath(path -> prefix + path);
     }
 }

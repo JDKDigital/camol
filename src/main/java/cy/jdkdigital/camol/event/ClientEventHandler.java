@@ -3,6 +3,7 @@ package cy.jdkdigital.camol.event;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import cy.jdkdigital.camol.Camol;
+import cy.jdkdigital.camol.utils.CamoHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -13,7 +14,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -23,7 +24,9 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.client.model.pipeline.VertexConsumerWrapper;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @EventBusSubscriber(modid = Camol.MODID, value = Dist.CLIENT)
@@ -31,29 +34,21 @@ public class ClientEventHandler
 {
     public static boolean shouldBeTransparent = false;
     public static boolean isTransparent = false;
+
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
         }
 
+        // Change transparency of camo blocks when switching items in hand
         if (Minecraft.getInstance().level != null && shouldBeTransparent != isTransparent) {
             isTransparent = shouldBeTransparent;
             Set<SectionPos> sections = new HashSet<>();
 
-            var chunkStorage = Minecraft.getInstance().level.getChunkSource().storage;
-
-            int i = chunkStorage.chunkRadius;
-            for (int j = chunkStorage.viewCenterZ - i; j <= chunkStorage.viewCenterZ + i; j++) {
-                for (int k = chunkStorage.viewCenterX - i; k <= chunkStorage.viewCenterX + i; k++) {
-                    LevelChunk levelchunk = chunkStorage.chunks.get(chunkStorage.getIndex(k, j));
-                    if (levelchunk != null) {
-                        levelchunk.getData(Camol.CAMO_BLOCK_MAP).keySet().forEach(posKey -> {
-                            sections.add(SectionPos.of(BlockPos.of((Long.parseLong(posKey)))));
-                        });
-                    }
-                }
-            }
+            CamoHelper.CLIENT_CAMO_MAP.entrySet().stream().filter(entry -> !entry.getValue().isAir()).forEach(entry -> {
+                sections.add(SectionPos.of(BlockPos.of((Long.parseLong(entry.getKey())))));
+            });
 
             for (SectionPos section : sections) {
                 Minecraft.getInstance().levelRenderer.setSectionDirty(section.x(), section.y(), section.z());
@@ -65,7 +60,8 @@ public class ClientEventHandler
     public static void geometryEvent(AddSectionGeometryEvent event) {
         SectionPos section = SectionPos.of(event.getSectionOrigin());
 
-        Map<BlockPos, BlockState> camoBlocks = event.getLevel().getChunkAt(event.getSectionOrigin()).getData(Camol.CAMO_BLOCK_MAP).entrySet().stream()
+        Map<BlockPos, BlockState> camoBlocks = CamoHelper.CLIENT_CAMO_MAP.entrySet().stream()
+                .filter(entry -> !entry.getValue().isAir())
                 .filter(p -> SectionPos.of(BlockPos.of(Long.parseLong(p.getKey()))).equals(section))
                 .collect(Collectors.toMap(e -> BlockPos.of(Long.parseLong(e.getKey())), Map.Entry::getValue));
 
@@ -86,9 +82,11 @@ public class ClientEventHandler
                     poseStack.pushPose();
                     poseStack.translate(SectionPos.sectionRelative(pos.getX()), SectionPos.sectionRelative(pos.getY()), SectionPos.sectionRelative(pos.getZ()));
 
-                    poseStack.translate(0.5, 0.5, 0.5);
-                    poseStack.scale(1.005F, 1.005F, 1.005F);
-                    poseStack.translate(-0.5, -0.5, -0.5);
+//                    if (level.getBlockState(pos).getShape(level, pos).equals(Shapes.block())) {
+                        poseStack.translate(0.5, 0.5, 0.5);
+                        poseStack.scale(1.005F, 1.005F, 1.005F);
+                        poseStack.translate(-0.5, -0.5, -0.5);
+//                    }
 
                     boolean shouldRenderTransparentCamo = Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).is(Camol.CAMO_ITEM);
                     for (RenderType renderType : model.getRenderTypes(camoState, random, ModelData.EMPTY)) {

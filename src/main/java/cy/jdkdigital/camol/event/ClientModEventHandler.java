@@ -14,10 +14,12 @@ import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 @EventBusSubscriber(modid = Camol.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public class ClientModEventHandler {
+public class ClientModEventHandler
+{
     @SubscribeEvent
     public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
-        event.registerItem(new IClientItemExtensions() {
+        event.registerItem(new IClientItemExtensions()
+        {
             final BlockEntityWithoutLevelRenderer myRenderer = new CamoItemRenderer();
 
             @Override

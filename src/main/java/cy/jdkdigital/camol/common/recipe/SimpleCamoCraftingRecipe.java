@@ -13,7 +13,8 @@ import net.minecraft.world.level.Level;
 
 public class SimpleCamoCraftingRecipe implements CraftingRecipe
 {
-    public SimpleCamoCraftingRecipe(CraftingBookCategory category) {}
+    public SimpleCamoCraftingRecipe(CraftingBookCategory category) {
+    }
 
     @Override
     public CraftingBookCategory category() {

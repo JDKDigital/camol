@@ -13,6 +13,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -32,10 +33,10 @@ public class CamoItem extends Item
             String posKey = String.valueOf(context.getClickedPos().asLong());
             var chunk = serverLevel.getChunkAt(context.getClickedPos());
             var camoData = new HashMap<>(chunk.getData(Camol.CAMO_BLOCK_MAP));
-            if (camoData.containsKey(posKey)) {
+            if (camoData.containsKey(posKey) && !camoData.get(posKey).isAir()) {
                 var camoState = camoData.get(posKey);
                 Block.popResourceFromFace(serverLevel, context.getClickedPos(), context.getClickedFace(), getCamoItem(camoState));
-                camoData.remove(posKey);
+                camoData.put(posKey, Blocks.AIR.defaultBlockState());
             } else {
                 var camoState = context.getItemInHand().get(Camol.BLOCK_COMPONENT);
                 if (camoState != null) {

@@ -122,6 +122,8 @@ dependencies {
     implementation "curse.maven:productivebees-377897:5611632"
     implementation "curse.maven:storage-drawers-223852:5633810"
     implementation "curse.maven:mekanism-268560:5574951"
+    implementation "curse.maven:fusion-connected-textures-854949:6183288"
+    implementation "curse.maven:dyenamics-509276:6137368"
 
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

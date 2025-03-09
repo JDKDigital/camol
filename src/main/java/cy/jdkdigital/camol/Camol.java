@@ -59,17 +59,18 @@ public class Camol
     public static final Supplier<DataComponentType<BlockState>> BLOCK_COMPONENT = DATA_COMPONENTS.register("block", () -> DataComponentType.<BlockState>builder().persistent(BlockState.CODEC).networkSynchronized(ByteBufCodecs.fromCodec(BlockState.CODEC)).build());
 
     public static final Supplier<AttachmentType<Map<String, BlockState>>> CAMO_BLOCK_MAP = ATTACHMENT_TYPES.register(
-        "camo", () -> AttachmentType.<Map<String, BlockState>>builder(() -> new HashMap<>()).serialize(Codec.unboundedMap(Codec.STRING, BlockState.CODEC)).build()
+            "camo", () -> AttachmentType.<Map<String, BlockState>>builder(() -> new HashMap<>()).serialize(Codec.unboundedMap(Codec.STRING, BlockState.CODEC)).build()
     );
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<?>> SIMPLE_CAMO_CRAFTING = RECIPE_SERIALIZERS.register("simple_camo_crafting", () -> new SimpleCraftingRecipeSerializer<>(SimpleCamoCraftingRecipe::new));
-    public static final DeferredHolder<RecipeType<?>, RecipeType<SimpleCamoCraftingRecipe>> SIMPLE_CAMO_CRAFTING_TYPE = RECIPE_TYPES.register("simple_camo_crafting", () -> new RecipeType<>() {});
+    public static final DeferredHolder<RecipeType<?>, RecipeType<SimpleCamoCraftingRecipe>> SIMPLE_CAMO_CRAFTING_TYPE = RECIPE_TYPES.register("simple_camo_crafting", () -> new RecipeType<>()
+    {
+    });
 
     public static final TagKey<Block> CAMO_BLACKLIST = BlockTags.create(ResourceLocation.fromNamespaceAndPath(MODID, "disallowed_camoable_blocks"));
     public static final TagKey<Item> CRAFTING_BLACKLIST = ItemTags.create(ResourceLocation.fromNamespaceAndPath(MODID, "disallowed_camo_blocks"));
 
-    public Camol(IEventBus modEventBus, ModContainer modContainer)
-    {
+    public Camol(IEventBus modEventBus, ModContainer modContainer) {
         ITEMS.register(modEventBus);
         BLOCKS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
@@ -91,8 +92,7 @@ public class Camol
     }
 
     // Add the example block item to the building blocks tab
-    private void addCreative(BuildCreativeModeTabContentsEvent event)
-    {
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
             ITEMS.getEntries().forEach(itemDeferredHolder -> {
                 event.accept(itemDeferredHolder.value());

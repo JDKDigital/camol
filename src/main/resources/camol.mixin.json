@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "cy.jdkdigital.camol.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "camol.refmap.json",
+  "mixins": [
+    "MixinBlock",
+    "MixinBlockState"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

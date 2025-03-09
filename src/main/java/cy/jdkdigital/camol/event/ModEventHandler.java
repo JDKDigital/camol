@@ -15,12 +15,12 @@ public class ModEventHandler
     public static void register(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar(Camol.MODID).versioned("1");
         registrar.playToClient(
-            SyncChunkCamoData.TYPE,
-            SyncChunkCamoData.STREAM_CODEC,
-            new DirectionalPayloadHandler<>(
-                    SyncChunkCamoData::clientHandle,
-                    SyncChunkCamoData::serverHandle
-            )
+                SyncChunkCamoData.TYPE,
+                SyncChunkCamoData.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        SyncChunkCamoData::clientHandle,
+                        SyncChunkCamoData::serverHandle
+                )
         );
     }
 }
