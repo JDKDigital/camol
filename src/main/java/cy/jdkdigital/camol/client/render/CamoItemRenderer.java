@@ -19,12 +19,10 @@ public class CamoItemRenderer extends BlockEntityWithoutLevelRenderer
     public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         BlockState state = stack.get(Camol.BLOCK_COMPONENT);
         if (state != null) {
-            ItemStack defaultInstance = state.getBlock().asItem().getDefaultInstance();
-
             poseStack.pushPose();
             poseStack.translate(0.5, 0.5, 0.5);
             poseStack.scale(2, 2, 2);
-            Minecraft.getInstance().getItemRenderer().renderStatic(Minecraft.getInstance().player, defaultInstance, ItemDisplayContext.FIXED, false, poseStack, buffer, Minecraft.getInstance().level, combinedLight, combinedOverlay, 0);
+            Minecraft.getInstance().getItemRenderer().renderStatic(Minecraft.getInstance().player, state.getBlock().asItem().getDefaultInstance(), ItemDisplayContext.FIXED, false, poseStack, buffer, Minecraft.getInstance().level, combinedLight, combinedOverlay, 0);
             poseStack.popPose();
         }
     }
