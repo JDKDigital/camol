@@ -63,9 +63,7 @@ public class Camol
     );
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<?>> SIMPLE_CAMO_CRAFTING = RECIPE_SERIALIZERS.register("simple_camo_crafting", () -> new SimpleCraftingRecipeSerializer<>(SimpleCamoCraftingRecipe::new));
-    public static final DeferredHolder<RecipeType<?>, RecipeType<SimpleCamoCraftingRecipe>> SIMPLE_CAMO_CRAFTING_TYPE = RECIPE_TYPES.register("simple_camo_crafting", () -> new RecipeType<>()
-    {
-    });
+    public static final DeferredHolder<RecipeType<?>, RecipeType<SimpleCamoCraftingRecipe>> SIMPLE_CAMO_CRAFTING_TYPE = RECIPE_TYPES.register("simple_camo_crafting", () -> new RecipeType<>() {});
 
     public static final TagKey<Block> CAMO_BLACKLIST = BlockTags.create(ResourceLocation.fromNamespaceAndPath(MODID, "disallowed_camoable_blocks"));
     public static final TagKey<Item> CRAFTING_BLACKLIST = ItemTags.create(ResourceLocation.fromNamespaceAndPath(MODID, "disallowed_camo_blocks"));
@@ -84,11 +82,6 @@ public class Camol
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
-
-        // somehow handle blockstates, maybe by putting it in different slots in the crafting grid or have a machine for it
-
-        // crafting recipe for camo item
-        // model for empty camo item
     }
 
     // Add the example block item to the building blocks tab

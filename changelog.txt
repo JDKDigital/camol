@@ -1,3 +1,8 @@
+1.21.1-0.2.1
+
+- Fixed camo blocks not being cleared when changing world or dimension
+
+
 1.21.1-0.2.0
 
 - Added support for connected textures

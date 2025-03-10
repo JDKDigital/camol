@@ -12,13 +12,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.AddSectionGeometryEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.client.model.pipeline.VertexConsumerWrapper;
@@ -82,16 +83,14 @@ public class ClientEventHandler
                     poseStack.pushPose();
                     poseStack.translate(SectionPos.sectionRelative(pos.getX()), SectionPos.sectionRelative(pos.getY()), SectionPos.sectionRelative(pos.getZ()));
 
-//                    if (level.getBlockState(pos).getShape(level, pos).equals(Shapes.block())) {
-                        poseStack.translate(0.5, 0.5, 0.5);
-                        poseStack.scale(1.005F, 1.005F, 1.005F);
-                        poseStack.translate(-0.5, -0.5, -0.5);
-//                    }
+                    poseStack.translate(0.5, 0.5, 0.5);
+                    poseStack.scale(1.005F, 1.005F, 1.005F);
+                    poseStack.translate(-0.5, -0.5, -0.5);
 
                     boolean shouldRenderTransparentCamo = Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).is(Camol.CAMO_ITEM);
                     for (RenderType renderType : model.getRenderTypes(camoState, random, ModelData.EMPTY)) {
                         VertexConsumer buffer = sectionRenderingContext.getOrCreateChunkBuffer(shouldRenderTransparentCamo ? RenderType.translucent() : renderType);
-                        blockRenderer.renderBatched(camoState, pos, level, poseStack, shouldRenderTransparentCamo ? new SemiTransparentVertexConsumer(buffer) : buffer, true, random, modelData, renderType);
+                        blockRenderer.renderBatched(camoState, pos, level, poseStack, shouldRenderTransparentCamo ? new CamoHelper.SemiTransparentVertexConsumer(buffer) : buffer, true, random, modelData, renderType);
                     }
                     poseStack.popPose();
                 }
@@ -99,16 +98,8 @@ public class ClientEventHandler
         }
     }
 
-    private static class SemiTransparentVertexConsumer extends VertexConsumerWrapper
-    {
-        public SemiTransparentVertexConsumer(VertexConsumer consumer) {
-            super(consumer);
-        }
-
-        @Override
-        public @NotNull VertexConsumer setColor(int color) {
-            super.setColor(color & 0x80ffffff);
-            return this;
-        }
+    @SubscribeEvent
+    public static void playerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        CamoHelper.CLIENT_CAMO_MAP.clear();
     }
 }

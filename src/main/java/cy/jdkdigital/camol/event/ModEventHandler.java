@@ -1,6 +1,7 @@
 package cy.jdkdigital.camol.event;
 
 import cy.jdkdigital.camol.Camol;
+import cy.jdkdigital.camol.network.ClearCamoData;
 import cy.jdkdigital.camol.network.SyncChunkCamoData;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -20,6 +21,14 @@ public class ModEventHandler
                 new DirectionalPayloadHandler<>(
                         SyncChunkCamoData::clientHandle,
                         SyncChunkCamoData::serverHandle
+                )
+        );
+        registrar.playToClient(
+                ClearCamoData.TYPE,
+                ClearCamoData.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClearCamoData::clientHandle,
+                        ClearCamoData::serverHandle
                 )
         );
     }
