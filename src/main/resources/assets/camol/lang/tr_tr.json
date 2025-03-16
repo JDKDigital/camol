@@ -1,0 +1,6 @@
+{
+  "item.camol.camo_item": "Kamuflaj Bloğu",
+  "item.camol.camo_item.camo": "Kamuflaj Bloğu - %s",
+  "item.camol.camo_item.hover": "Bu blok olarak gizlemek için bir bloğa Sağ tıkla. Kamuflajlı bir bloğun gizliliğini kaldırmak için ona Sağ tıkla.",
+  "item.camol.camo_item.hover_empty": "Bir blok ile birlikte üret."
+}
