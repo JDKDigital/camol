@@ -1,0 +1,6 @@
+{
+  "item.camol.camo_item": "Bloco de Camuflagem",
+  "item.camol.camo_item.camo": "Bloco de Camuflagem - %s",
+  "item.camol.camo_item.hover": "Clique com o botão direito em um bloco para disfarçá-lo como este. Clique com o botão direito em um bloco camuflado para remover o disfarce.",
+  "item.camol.camo_item.hover_empty": "Crie junto com um bloco."
+}
