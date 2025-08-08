@@ -15,7 +15,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 public class ModEventHandler
 {
     @SubscribeEvent
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+    public static void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
             Camol.ITEMS.getEntries().forEach(itemDeferredHolder -> {
                 event.accept(itemDeferredHolder.value());

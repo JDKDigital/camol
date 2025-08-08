@@ -2,6 +2,7 @@ package cy.jdkdigital.camol.common.item;
 
 import cy.jdkdigital.camol.Camol;
 import cy.jdkdigital.camol.network.SyncChunkCamoData;
+import cy.jdkdigital.camol.utils.CamoPosition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -29,20 +30,25 @@ public class CamoItem extends Item
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        if (context.getItemInHand().has(Camol.BLOCK_COMPONENT) && context.getLevel() instanceof ServerLevel serverLevel && !serverLevel.getBlockState(context.getClickedPos()).is(Camol.CAMO_BLACKLIST)) {
+        if (context.getLevel() instanceof ServerLevel serverLevel && !serverLevel.getBlockState(context.getClickedPos()).is(Camol.CAMO_BLACKLIST)) {
+            boolean isSolid = this.getDescriptionId().contains("solid");
             String posKey = String.valueOf(context.getClickedPos().asLong());
             var chunk = serverLevel.getChunkAt(context.getClickedPos());
+
             var camoData = new HashMap<>(chunk.getData(Camol.CAMO_BLOCK_MAP));
-            if (camoData.containsKey(posKey) && !camoData.get(posKey).isAir()) {
-                var camoState = camoData.get(posKey);
-                Block.popResourceFromFace(serverLevel, context.getClickedPos(), context.getClickedFace(), getCamoItem(camoState));
-                camoData.put(posKey, Blocks.AIR.defaultBlockState());
-            } else {
+            if (camoData.containsKey(posKey) && !camoData.get(posKey).state().isAir()) {
+                var camoPosition = camoData.get(posKey);
+                Block.popResourceFromFace(serverLevel, context.getClickedPos(), context.getClickedFace(), getCamoItem(camoPosition.state(), camoPosition.camoType().equals("solid")));
+                camoData.put(posKey, new CamoPosition("normal", Blocks.AIR.defaultBlockState()));
+            } else if (context.getItemInHand().has(Camol.BLOCK_COMPONENT)) {
                 var camoState = context.getItemInHand().get(Camol.BLOCK_COMPONENT);
                 if (camoState != null) {
                     var placeContext = new BlockPlaceContext(serverLevel, context.getPlayer(), context.getHand(), camoState.getBlock().asItem().getDefaultInstance(), new BlockHitResult(context.getClickLocation(), context.getPlayer().getDirection(), context.getClickedPos().relative(context.getPlayer().getDirection()), false));
                     var placedState = camoState.getBlock().getStateForPlacement(placeContext);
-                    camoData.put(posKey, placedState);
+                    if (placedState == null) {
+                        placedState = camoState.getBlock().defaultBlockState();
+                    }
+                    camoData.put(posKey, new CamoPosition(isSolid ? "solid" : "normal", placedState));
                     if (context.getPlayer() == null || !context.getPlayer().hasInfiniteMaterials()) {
                         context.getItemInHand().shrink(1);
                     }
@@ -65,10 +71,15 @@ public class CamoItem extends Item
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable(this.getDescriptionId() + ".hover" + (!stack.has(Camol.BLOCK_COMPONENT) ? "_empty" : "")).withStyle(ChatFormatting.GREEN));
+        tooltipComponents.add(Component.translatable(this.getDescriptionId() + ".hover_type").withStyle(ChatFormatting.GREEN));
     }
 
-    public static ItemStack getCamoItem(BlockState state) {
-        var stack = new ItemStack(Camol.CAMO_ITEM.get());
+    public static ItemStack getCamoItem(BlockState state, boolean isSolid) {
+        ItemStack stack = isSolid ? Camol.SOLID_CAMO_ITEM.get().getDefaultInstance() : Camol.CAMO_ITEM.get().getDefaultInstance();
+        return getCamoItem(state, stack);
+    }
+
+    public static ItemStack getCamoItem(BlockState state, ItemStack stack) {
         stack.set(Camol.BLOCK_COMPONENT, state.getBlock().defaultBlockState());
         return stack;
     }

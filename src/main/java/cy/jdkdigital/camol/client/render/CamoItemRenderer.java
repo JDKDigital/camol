@@ -5,6 +5,7 @@ import cy.jdkdigital.camol.Camol;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,7 +23,8 @@ public class CamoItemRenderer extends BlockEntityWithoutLevelRenderer
             poseStack.pushPose();
             poseStack.translate(0.5, 0.5, 0.5);
             poseStack.scale(2, 2, 2);
-            Minecraft.getInstance().getItemRenderer().renderStatic(Minecraft.getInstance().player, state.getBlock().asItem().getDefaultInstance(), ItemDisplayContext.FIXED, false, poseStack, buffer, Minecraft.getInstance().level, combinedLight, combinedOverlay, 0);
+            boolean leftHand = Minecraft.getInstance().player != null && Minecraft.getInstance().player.getUsedItemHand().equals(InteractionHand.OFF_HAND);
+            Minecraft.getInstance().getItemRenderer().renderStatic(Minecraft.getInstance().player, state.getBlock().asItem().getDefaultInstance(), ItemDisplayContext.FIXED, leftHand, poseStack, buffer, Minecraft.getInstance().level, combinedLight, combinedOverlay, 0);
             poseStack.popPose();
         }
     }

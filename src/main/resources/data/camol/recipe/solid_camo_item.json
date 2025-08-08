@@ -1,6 +1,6 @@
 {
   "type": "camol:simple_camo_crafting",
   "camo_item": {
-    "id": "camol:camo_item"
+    "id": "camol:solid_camo_item"
   }
 }

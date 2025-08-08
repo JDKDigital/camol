@@ -1,3 +1,24 @@
+1.21.1-0.3.0
+
+- Added shape retaining camo blocks. They use the collision shape of the block used for camo.
+
+
+1.21.1-0.2.4
+
+- Don't drop air camo blocks from when mods break blocks without triggering a block break event...thanks Create <3
+
+
+1.21.1-0.2.3
+
+- Allow un-configured camo items to strip un-camo blocks
+- Fixed crash when camoing free standing blocks with a camo that requires a surface (like buttons)
+
+
+1.21.1-0.2.2
+
+- Fixed camo block not clearing on block break
+
+
 1.21.1-0.2.1
 
 - Fixed camo blocks not being cleared when changing world or dimension

@@ -26,13 +26,14 @@ public class ClientModEventHandler
             public BlockEntityWithoutLevelRenderer getCustomRenderer() {
                 return myRenderer;
             }
-        }, Camol.CAMO_ITEM.get());
+        }, Camol.CAMO_ITEM.get(), Camol.SOLID_CAMO_ITEM.get());
     }
 
     @SubscribeEvent
     public static void init(final FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             ItemProperties.register(Camol.CAMO_ITEM.get(), ResourceLocation.withDefaultNamespace("tuned"), (stack, world, entity, i) -> stack.has(Camol.BLOCK_COMPONENT) ? 1.0F : 0.0F);
+            ItemProperties.register(Camol.SOLID_CAMO_ITEM.get(), ResourceLocation.withDefaultNamespace("tuned"), (stack, world, entity, i) -> stack.has(Camol.BLOCK_COMPONENT) ? 1.0F : 0.0F);
         });
     }
 }

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import cy.jdkdigital.camol.Camol;
 import cy.jdkdigital.camol.utils.CamoHelper;
+import cy.jdkdigital.camol.utils.CamoPosition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -42,9 +43,13 @@ public class ClientEventHandler
         // Change transparency of camo blocks when switching items in hand
         if (Minecraft.getInstance().level != null && shouldBeTransparent != isTransparent) {
             isTransparent = shouldBeTransparent;
+
             Set<SectionPos> sections = new HashSet<>();
 
-            CamoHelper.CLIENT_CAMO_MAP.entrySet().stream().filter(entry -> !entry.getValue().isAir()).forEach(entry -> {
+//            CamoHelper.CLIENT_CAMO_MAP.forEach((position, camoPosition) -> {
+//                Camol.LOGGER.debug("Camo at " + BlockPos.of((Long.parseLong(position))) + " has state " + camoPosition.state() + " and type " + camoPosition.camoType());
+//            });
+            CamoHelper.CLIENT_CAMO_MAP.entrySet().stream().filter(entry -> !entry.getValue().state().isAir()).forEach(entry -> {
                 sections.add(SectionPos.of(BlockPos.of((Long.parseLong(entry.getKey())))));
             });
 
@@ -58,8 +63,8 @@ public class ClientEventHandler
     public static void geometryEvent(AddSectionGeometryEvent event) {
         SectionPos section = SectionPos.of(event.getSectionOrigin());
 
-        Map<BlockPos, BlockState> camoBlocks = CamoHelper.CLIENT_CAMO_MAP.entrySet().stream()
-                .filter(entry -> !entry.getValue().isAir())
+        Map<BlockPos, CamoPosition> camoBlocks = CamoHelper.CLIENT_CAMO_MAP.entrySet().stream()
+                .filter(entry -> !entry.getValue().state().isAir())
                 .filter(p -> SectionPos.of(BlockPos.of(Long.parseLong(p.getKey()))).equals(section))
                 .collect(Collectors.toMap(e -> BlockPos.of(Long.parseLong(e.getKey())), Map.Entry::getValue));
 
@@ -68,9 +73,9 @@ public class ClientEventHandler
                 BlockAndTintGetter level = sectionRenderingContext.getRegion();
                 var random = RandomSource.create();
 
-                for (Map.Entry<BlockPos, BlockState> entry : camoBlocks.entrySet()) {
+                for (Map.Entry<BlockPos, CamoPosition> entry : camoBlocks.entrySet()) {
                     BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-                    BlockState camoState = entry.getValue();
+                    BlockState camoState = entry.getValue().state();
                     BlockPos pos = entry.getKey();
                     PoseStack poseStack = sectionRenderingContext.getPoseStack();
 
@@ -84,7 +89,8 @@ public class ClientEventHandler
                     poseStack.scale(1.005F, 1.005F, 1.005F);
                     poseStack.translate(-0.5, -0.5, -0.5);
 
-                    boolean shouldRenderTransparentCamo = Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).is(Camol.CAMO_ITEM);
+                    var heldStack = Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND);
+                    boolean shouldRenderTransparentCamo = heldStack.is(Camol.CAMO_ITEM) || heldStack.is(Camol.SOLID_CAMO_ITEM);
                     for (RenderType renderType : model.getRenderTypes(camoState, random, ModelData.EMPTY)) {
                         VertexConsumer buffer = sectionRenderingContext.getOrCreateChunkBuffer(shouldRenderTransparentCamo ? RenderType.translucent() : renderType);
                         blockRenderer.renderBatched(camoState, pos, level, poseStack, shouldRenderTransparentCamo ? new CamoHelper.SemiTransparentVertexConsumer(buffer) : buffer, true, random, modelData, renderType);

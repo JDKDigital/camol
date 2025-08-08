@@ -1,3 +1,7 @@
-// 1.21.1	2025-03-06T11:21:52.8740235	Recipes
+// 1.21.1	2025-08-08T23:29:42.3870501	Recipes
 33cc38b8340c148fdc40a68a3ebfe391f0b0fb14 data/camol/advancement/recipes/misc/camo_item.json
+895a18a50384090830e6f828060b1c0de12d7222 data/camol/advancement/recipes/misc/camo_item_from_solid.json
+6c30e11bc928b8ef9c98a1c48570a269fe69d08b data/camol/advancement/recipes/misc/solid_camo_item_from_simple.json
 a82276d758c6626c9db0bcf1080273fa93cc2a7b data/camol/recipe/camo_item.json
+64149b039c5fba046642d4b4a99010dfa611d42f data/camol/recipe/camo_item_from_solid.json
+ff5cd833d91c36c3375441c221f8dd5153b0af5b data/camol/recipe/solid_camo_item_from_simple.json

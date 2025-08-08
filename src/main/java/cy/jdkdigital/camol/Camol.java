@@ -5,7 +5,9 @@ import com.mojang.serialization.Codec;
 import cy.jdkdigital.camol.common.block.CamoConfiguratorBlock;
 import cy.jdkdigital.camol.common.block.entity.CamoConfiguratorBlockEntity;
 import cy.jdkdigital.camol.common.item.CamoItem;
+import cy.jdkdigital.camol.common.recipe.ConvertCamoCraftingRecipe;
 import cy.jdkdigital.camol.common.recipe.SimpleCamoCraftingRecipe;
+import cy.jdkdigital.camol.utils.CamoPosition;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -14,11 +16,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -28,9 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.attachment.AttachmentType;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.*;
 import org.slf4j.Logger;
 
@@ -53,17 +51,23 @@ public class Camol
     public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(BuiltInRegistries.RECIPE_TYPE, MODID);
 
     public static final DeferredItem<Item> CAMO_ITEM = registerItem("camo_item", () -> new CamoItem(new Item.Properties()));
+    public static final DeferredItem<Item> SOLID_CAMO_ITEM = registerItem("solid_camo_item", () -> new CamoItem(new Item.Properties()));
     public static final DeferredBlock<Block> CAMO_CONFIGURATOR_BLOCK = registerBlock("camo_configurator", () -> new CamoConfiguratorBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK).noOcclusion()));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CamoConfiguratorBlockEntity>> CAMO_CONFIGURATOR_BLOCK_ENTITY = registerBlockEntity("camo_configurator", () -> createBlockEntityType(CamoConfiguratorBlockEntity::new, CAMO_CONFIGURATOR_BLOCK.get()));
 
     public static final Supplier<DataComponentType<BlockState>> BLOCK_COMPONENT = DATA_COMPONENTS.register("block", () -> DataComponentType.<BlockState>builder().persistent(BlockState.CODEC).networkSynchronized(ByteBufCodecs.fromCodec(BlockState.CODEC)).build());
 
-    public static final Supplier<AttachmentType<Map<String, BlockState>>> CAMO_BLOCK_MAP = ATTACHMENT_TYPES.register(
+    public static final Supplier<AttachmentType<Map<String, BlockState>>> OLD_CAMO_BLOCK_MAP = ATTACHMENT_TYPES.register(
             "camo", () -> AttachmentType.<Map<String, BlockState>>builder(() -> new HashMap<>()).serialize(Codec.unboundedMap(Codec.STRING, BlockState.CODEC)).build()
     );
+    public static final Supplier<AttachmentType<Map<String, CamoPosition>>> CAMO_BLOCK_MAP = ATTACHMENT_TYPES.register(
+            "solid_camo", () -> AttachmentType.<Map<String, CamoPosition>>builder(() -> new HashMap<>()).serialize(Codec.unboundedMap(Codec.STRING, CamoPosition.CODEC)).build()
+    );
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<?>> SIMPLE_CAMO_CRAFTING = RECIPE_SERIALIZERS.register("simple_camo_crafting", () -> new SimpleCraftingRecipeSerializer<>(SimpleCamoCraftingRecipe::new));
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<?>> SIMPLE_CAMO_CRAFTING = RECIPE_SERIALIZERS.register("simple_camo_crafting", SimpleCamoCraftingRecipe.Serializer::new);
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<?>> CONVERT_CAMO_CRAFTING = RECIPE_SERIALIZERS.register("convert_camo_crafting", ConvertCamoCraftingRecipe.Serializer::new);
     public static final DeferredHolder<RecipeType<?>, RecipeType<SimpleCamoCraftingRecipe>> SIMPLE_CAMO_CRAFTING_TYPE = RECIPE_TYPES.register("simple_camo_crafting", () -> new RecipeType<>() {});
+    public static final DeferredHolder<RecipeType<?>, RecipeType<SimpleCamoCraftingRecipe>> CONVERT_CAMO_CRAFTING_TYPE = RECIPE_TYPES.register("convert_camo_crafting", () -> new RecipeType<>() {});
 
     public static final TagKey<Block> CAMO_BLACKLIST = BlockTags.create(ResourceLocation.fromNamespaceAndPath(MODID, "disallowed_camoable_blocks"));
     public static final TagKey<Item> CRAFTING_BLACKLIST = ItemTags.create(ResourceLocation.fromNamespaceAndPath(MODID, "disallowed_camo_blocks"));

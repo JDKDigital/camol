@@ -18,7 +18,7 @@ public class ItemTagProvider extends ItemTagsProvider
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        tag(Camol.CRAFTING_BLACKLIST).addTag(ItemTags.DOORS);
+        tag(Camol.CRAFTING_BLACKLIST).addTag(ItemTags.DOORS).addTag(ItemTags.BEDS);
     }
 
     @Override

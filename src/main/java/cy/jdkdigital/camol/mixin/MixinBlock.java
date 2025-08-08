@@ -19,7 +19,7 @@ public abstract class MixinBlock
     )
     private static BlockState shouldRenderCamoFace(BlockState value, BlockState state, BlockGetter level, BlockPos pos, Direction side, BlockPos sidePos) {
         if (pos != null && side != null) {
-            var camoState = CamoHelper.getClientCamoBlockState(pos.relative(side));
+            var camoState = CamoHelper.getClientCamoBlockState(pos.relative(side)).state();
             if (camoState != null && !camoState.isAir()) {
                 return camoState;
             }

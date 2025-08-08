@@ -1,0 +1,9 @@
+{
+  "type": "camol:convert_camo_crafting",
+  "camo_input": {
+    "id": "camol:camo_item"
+  },
+  "camo_output": {
+    "id": "camol:solid_camo_item"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "camol:item/camo_item"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "tuned": 1
+      },
+      "model": "camol:item/camo_item_tuned"
+    }
+  ]
+}
