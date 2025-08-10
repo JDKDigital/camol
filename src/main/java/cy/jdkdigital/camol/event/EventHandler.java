@@ -46,7 +46,11 @@ public class EventHandler
     @SubscribeEvent
     public static void playerTick(PlayerTickEvent.Post event) {
         if (event.getEntity().level().isClientSide) {
-            ClientEventHandler.shouldBeTransparent = event.getEntity().getMainHandItem().is(Camol.CAMO_ITEM) || event.getEntity().getOffhandItem().is(Camol.CAMO_ITEM);
+            ClientEventHandler.shouldBeTransparent =
+                    event.getEntity().getMainHandItem().is(Camol.CAMO_ITEM) ||
+                    event.getEntity().getOffhandItem().is(Camol.SOLID_CAMO_ITEM) ||
+                    event.getEntity().getMainHandItem().is(Camol.SOLID_CAMO_ITEM) ||
+                    event.getEntity().getOffhandItem().is(Camol.SOLID_CAMO_ITEM);
         }
     }
 
