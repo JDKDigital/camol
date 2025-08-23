@@ -1,0 +1,12 @@
+{
+  "item.camol.camo_item": "カモフラブロック",
+  "item.camol.solid_camo_item": "形状保持カモフラブロック",
+  "item.camol.camo_item.camo": "カモフラブロック（%s）",
+  "item.camol.solid_camo_item.camo": "形状保持カモフラブロック（%s）",
+  "item.camol.camo_item.hover": "ブロックを右クリックすると、このブロックに偽装します。偽装されたブロックを右クリックすると、偽装を解除します",
+  "item.camol.camo_item.hover_type": "偽装されるブロックの当たり判定を使用します",
+  "item.camol.camo_item.hover_empty": "ブロックとクラフトしてください",
+  "item.camol.solid_camo_item.hover": "ブロックを右クリックすると、このブロックに偽装します。偽装されたブロックを右クリックすると、偽装を解除します",
+  "item.camol.solid_camo_item.hover_type": "偽装するブロックの当たり判定を使用します",
+  "item.camol.solid_camo_item.hover_empty": "ブロックとクラフトしてください"
+}
