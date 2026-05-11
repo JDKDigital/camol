@@ -24,4 +24,8 @@ public record CamoPosition(String camoType, BlockState state)
             CamoPosition::state,
             CamoPosition::new
     );
+
+    public String camoType() {
+        return camoType != null ? camoType : "normal";
+    }
 }

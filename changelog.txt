@@ -1,3 +1,8 @@
+1.21.1-0.3.1
+
+- Added guard against null values
+
+
 1.21.1-0.3.0
 
 - Added shape retaining camo blocks. They use the collision shape of the block used for camo.
